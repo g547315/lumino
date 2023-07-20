@@ -732,6 +732,7 @@ export class TabBar<T> extends Widget {
         event.stopPropagation()
       );
       input.addEventListener('blur', onblur);
+      input.addEventListener('DOMContentLoaded', function() {
       input.addEventListener('keydown', (event: KeyboardEvent) => {
         if (event.key === 'Enter') {
           if (input.value !== '') {
@@ -748,15 +749,16 @@ export class TabBar<T> extends Widget {
       if (label.children.length > 0) {
         (label.children[0] as HTMLElement).focus();
       }
-    }
-  }
+    })}}
+    
 
   /**
    * Handle the `'keydown'` event for the tab bar.
    */
   private _evtKeyDown(event: KeyboardEvent): void {
+    
     // Allow for navigation using tab key
-    if (event.key === 'Tab') {
+    if (event.key === 'Enter') {
       return;
     }
 
@@ -773,6 +775,7 @@ export class TabBar<T> extends Widget {
       let focusedElement = document.activeElement;
 
       if (focusedElement) {
+        
         // Check if the focus element was the add button
         if (focusedElement.classList.contains('lm-TabBar-addButton')) {
           this._addRequested.emit();
@@ -818,6 +821,7 @@ export class TabBar<T> extends Widget {
       this.addButtonEnabled &&
       this.addButtonNode.contains(event.target as HTMLElement);
 
+    
     // Lookup the tab nodes.
     let tabs = this.contentNode.children;
 
@@ -828,6 +832,13 @@ export class TabBar<T> extends Widget {
 
     // Do nothing if the press is not on a tab or the add button.
     if (index === -1 && !addButtonClicked) {
+      return;
+    }
+
+    let addButtonTabbed =
+      this.addButtonEnabled &&
+       this.addButtonNode.contains(event.target as HTMLElement);
+    if (index === -1 && !addButtonTabbed) {
       return;
     }
 
@@ -857,9 +868,11 @@ export class TabBar<T> extends Widget {
     this.document.addEventListener('pointerup', this, true);
 
     // Do nothing else if the middle button or add button is clicked.
-    if (event.button === 1 || addButtonClicked) {
+    if (event.button === 1 || addButtonClicked || addButtonTabbed) {
       return;
     }
+
+    
 
     // Do nothing else if the close icon is clicked.
     let icon = tabs[index].querySelector(this.renderer.closeIconSelector);
@@ -1015,6 +1028,13 @@ export class TabBar<T> extends Widget {
         return;
       }
 
+    let addButtonTabbed =
+      this.addButtonEnabled &&
+      this.addButtonNode.contains(event.target as HTMLElement);
+    if (addButtonTabbed) {
+      this._addRequested.emit(undefined);
+      return;
+    }
       // Lookup the tab nodes.
       let tabs = this.contentNode.children;
 
@@ -1297,7 +1317,7 @@ export class TabBar<T> extends Widget {
   private _titlesEditable: boolean = false;
   private _previousTitle: Title<T> | null = null;
   private _dragData: Private.IDragData | null = null;
-  private _addButtonEnabled: boolean = false;
+  private _addButtonEnabled: boolean = true;
   private _tabMoved = new Signal<this, TabBar.ITabMovedArgs<T>>(this);
   private _currentChanged = new Signal<this, TabBar.ICurrentChangedArgs<T>>(
     this
