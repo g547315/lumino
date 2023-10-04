@@ -849,7 +849,7 @@ export class TabBar<T> extends Widget {
         nextFocused?.setAttribute('tabindex', '0');
         (nextFocused as HTMLElement).focus();
       }
-    }
+    } 
   }
 
   /**
@@ -1713,7 +1713,8 @@ export namespace TabBar {
         return h.li(
           { id, key, className, title, style, dataset, ...aria },
           this.renderIcon(data),
-          this.renderLabel(data)
+          this.renderLabel(data),
+          this.renderOverlay(data)
         );
       }
     }
@@ -1753,6 +1754,14 @@ export namespace TabBar {
      */
     renderCloseIcon(data: IRenderData<any>): VirtualElement {
       return h.div({ className: 'lm-TabBar-tabCloseIcon' });
+    }
+
+    renderOverlay(data: IRenderData<any>): VirtualElement {
+      if (data.title.label == 'Launcher') {
+        return h.div({ className: 'lm-TabBar-UI-Overlay.lm-mod-hidden' });
+      } else {
+        return h.div({ className: 'lm-TabBar-UI-Overlay' });
+      }
     }
 
     /**
