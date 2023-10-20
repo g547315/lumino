@@ -29,9 +29,6 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 import { VirtualElement } from '@lumino/virtualdom';
 
-
-
-
 /**
  * An object which manages a collection of commands.
  *
@@ -1170,6 +1167,9 @@ export namespace CommandRegistry {
     if (parts.cmd && Platform.IS_MAC) {
       mods += 'Cmd ';
     }
+    if (!parts.key) {
+      return mods.trim();
+    }
     return mods + parts.key;
   }
 
@@ -1253,7 +1253,7 @@ export namespace CommandRegistry {
   export function keystrokeForKeydownEvent(event: KeyboardEvent): string {
     let layout = getKeyboardLayout();
     let key = layout.keyForKeydownEvent(event);
-    let mods = []
+    let mods = [];
 
     if (event.ctrlKey) {
       mods.push('Ctrl');
@@ -1267,23 +1267,13 @@ export namespace CommandRegistry {
     if (event.metaKey && Platform.IS_MAC) {
       mods.push('Cmd');
     }
-    if (!mods.includes(event.key) && !event.ctrlKey) {
+    if (!layout.isModifierKey(key)) {
       mods.push(key);
+      return mods.join(' ');
+    } else {
+      // for purely modifier key strings add a space so they can be matched
+      return mods.join(' ') + ' ';
     }
-
-    // Handle the edge cases
-    
-    // Handle the edge case for triggering the Alt Shift key binding
-    if (mods.length === 2 && (mods[0] === 'Alt' && mods[1] === 'Shift')) {
-        return "Alt" + ' ' + "Shift" + ' '
-    } 
-
-    // Handle the edge case for triggering the Alt key binding
-    if (mods.length === 1 && mods[0] === 'Alt') {
-      return "Alt" + ' '
-      }
-      
-    return mods.join(' ');
   }
 }
 
