@@ -536,6 +536,9 @@ export class CommandRegistry {
       this._keystrokes,
       event
     );
+    console.log(this._keyBindings);
+    console.log(this._keystrokes);
+    console.log(exact, null, partial);
 
     // If there is no exact match and no partial match, replay
     // any suppressed events and clear the pending state.
@@ -1269,11 +1272,11 @@ export namespace CommandRegistry {
     }
     if (!layout.isModifierKey(key)) {
       mods.push(key);
+      // for  modifier and character key strings
       return mods.join(' ');
-    } else {
-      // for purely modifier key strings add a space so they can be matched
-      return mods.join(' ') + ' ';
     }
+    // for purely modifier key strings
+    return mods.join(' ');
   }
 }
 
