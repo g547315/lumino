@@ -553,15 +553,38 @@ export class CommandRegistry {
     event.preventDefault();
     event.stopPropagation();
 
+    // Remove modifier key only keystrokes from the current key sequence.
+    // keystrokes that are modifier key(s) plus another key are not affected
+    // intended functionality: Alt then Alt 1 should result to: ['Alt'] then ['Alt 1']
+    // Removing this code results in mod key duplication: ['Alt', 'Alt 1']
+    if (
+      // Check that only a mod key has been pressed
+      (event.altKey && event.key === 'Alt') ||
+      (event.ctrlKey && event.key === 'Ctrl') ||
+      (event.shiftKey && event.key === 'Shift')
+    ) {
+      this._keystrokes.length = 0;
+    }
+    
+    console.log(exact?.keys.toString())
+
     // If there is an exact match but no partial match, the exact match
     // can be dispatched immediately. The pending state is cleared so
     // the next key press starts from the default state.
     if (exact && !partial) {
-      this._executeKeyBinding(exact);
-      this._clearPendingState();
-      return;
+      if (
+        exact.keys.toString() === 'Alt' ||
+        exact.keys.toString() === 'Ctrl' ||
+        exact.keys.toString() === 'Shift'
+      ) {
+        return
+      } else {
+        this._executeKeyBinding(exact);
+        this._clearPendingState();
+        return;
+      }
     }
-
+    
     // If there is both an exact match and a partial match, the exact
     // match is stored for future dispatch in case the timer expires
     // before a more specific match is triggered.
