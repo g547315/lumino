@@ -537,6 +537,14 @@ export class CommandRegistry {
       event
     );
 
+    // If there is no exact match and no partial match, replay
+    // any suppressed events and clear the pending state.
+    if (!exact && !partial) {
+      this._replayKeydownEvents();
+      this._clearPendingState();
+      return;
+    }
+
     // Remove modifier key only keystrokes from the current key sequence.
     // keystrokes that are modifier key(s) plus another key are not affected
     // intended functionality: Alt then Alt 1 should result to: ['Alt'] then ['Alt 1']
@@ -549,7 +557,6 @@ export class CommandRegistry {
     ) {
       this._keystrokes.length = 0;
     }
-
 
     // If there is an exact match that is not excluded and no partial match, the exact match
     // can be dispatched immediately. The pending state is cleared so
@@ -565,7 +572,6 @@ export class CommandRegistry {
 
       return;
     }
-
 
     // Stop propagation of the event. If there is only a partial match,
     // the event will be replayed if a final exact match never occurs.
