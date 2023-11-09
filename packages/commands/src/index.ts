@@ -565,26 +565,26 @@ export class CommandRegistry {
     ) {
       this._keystrokes.length = 0;
     }
-    
-    console.log(exact?.keys.toString())
+
+    console.log(exact?.keys.toString());
 
     // If there is an exact match but no partial match, the exact match
     // can be dispatched immediately. The pending state is cleared so
     // the next key press starts from the default state.
-    if (exact && !partial) {
-      if (
+    if (
+      exact &&
+      !partial &&
+      !(
         exact.keys.toString() === 'Alt' ||
         exact.keys.toString() === 'Ctrl' ||
         exact.keys.toString() === 'Shift'
-      ) {
-        return
-      } else {
-        this._executeKeyBinding(exact);
-        this._clearPendingState();
-        return;
-      }
+      )
+    ) {
+      this._executeKeyBinding(exact);
+      this._clearPendingState();
+      return;
     }
-    
+
     // If there is both an exact match and a partial match, the exact
     // match is stored for future dispatch in case the timer expires
     // before a more specific match is triggered.
