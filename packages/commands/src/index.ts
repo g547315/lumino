@@ -549,7 +549,6 @@ export class CommandRegistry {
     console.log(this._keystrokes);
     console.log(exact, null, partial);
 
-
     // Remove modifier key only keystrokes from the current key sequence.
     // keystrokes that are modifier key(s) plus another key are not affected
     // intended functionality: Alt then Alt 1 should result to: ['Alt'] then ['Alt 1']
@@ -563,18 +562,22 @@ export class CommandRegistry {
       this._keystrokes.length = 0;
     }
 
-    // If there is an exact match that is not excluded and no partial match, the exact match
+    console.log(exact?.keys.toString());
+
+    // If there is an exact match but no partial match, the exact match
     // can be dispatched immediately. The pending state is cleared so
     // the next key press starts from the default state.
-    // add new modifier only key commands that should be excluded to the end of the if statement
     if (
       exact &&
       !partial &&
-      !exact?.command.includes('application:activate-sidebar-overlays')
+      !(
+        exact.keys.toString() === 'Alt' ||
+        exact.keys.toString() === 'Ctrl' ||
+        exact.keys.toString() === 'Shift'
+      )
     ) {
       this._executeKeyBinding(exact);
       this._clearPendingState();
-
       return;
     }
 
