@@ -545,6 +545,11 @@ export class CommandRegistry {
       return;
     }
 
+    console.log(this._keyBindings);
+    console.log(this._keystrokes);
+    console.log(exact, null, partial);
+
+
     // Remove modifier key only keystrokes from the current key sequence.
     // keystrokes that are modifier key(s) plus another key are not affected
     // intended functionality: Alt then Alt 1 should result to: ['Alt'] then ['Alt 1']
