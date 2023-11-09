@@ -512,7 +512,7 @@ export class CommandRegistry {
    */
   processKeydownEvent(event: KeyboardEvent): void {
     // Bail immediately if playing back keystrokes.
-    if (this._replaying || CommandRegistry.isModifierKeyPressed(event)) {
+    if (this._replaying) {
       return;
     }
 
@@ -537,13 +537,35 @@ export class CommandRegistry {
       event
     );
 
-    // If there is no exact match and no partial match, replay
-    // any suppressed events and clear the pending state.
-    if (!exact && !partial) {
-      this._replayKeydownEvents();
+    // Remove modifier key only keystrokes from the current key sequence.
+    // keystrokes that are modifier key(s) plus another key are not affected
+    // intended functionality: Alt then Alt 1 should result to: ['Alt'] then ['Alt 1']
+    // Removing this code results in mod key duplication: ['Alt', 'Alt 1']
+    if (
+      // Check that only a mod key has been pressed
+      (event.altKey && event.key === 'Alt') ||
+      (event.ctrlKey && event.key === 'Ctrl') ||
+      (event.shiftKey && event.key === 'Shift')
+    ) {
+      this._keystrokes.length = 0;
+    }
+
+
+    // If there is an exact match that is not excluded and no partial match, the exact match
+    // can be dispatched immediately. The pending state is cleared so
+    // the next key press starts from the default state.
+    // add new modifier only key commands that should be excluded to the end of the if statement
+    if (
+      exact &&
+      !partial &&
+      !exact?.command.includes('application:activate-sidebar-overlays')
+    ) {
+      this._executeKeyBinding(exact);
       this._clearPendingState();
+
       return;
     }
+
 
     // Stop propagation of the event. If there is only a partial match,
     // the event will be replayed if a final exact match never occurs.
@@ -1175,6 +1197,9 @@ export namespace CommandRegistry {
     if (parts.cmd && Platform.IS_MAC) {
       mods += 'Cmd ';
     }
+    if (!parts.key) {
+      return mods.trim();
+    }
     return mods + parts.key;
   }
 
@@ -1258,10 +1283,8 @@ export namespace CommandRegistry {
   export function keystrokeForKeydownEvent(event: KeyboardEvent): string {
     let layout = getKeyboardLayout();
     let key = layout.keyForKeydownEvent(event);
-    if (!key || layout.isModifierKey(key)) {
-      return '';
-    }
     let mods = [];
+
     if (event.ctrlKey) {
       mods.push('Ctrl');
     }
@@ -1274,7 +1297,12 @@ export namespace CommandRegistry {
     if (event.metaKey && Platform.IS_MAC) {
       mods.push('Cmd');
     }
-    mods.push(key);
+    if (!layout.isModifierKey(key)) {
+      mods.push(key);
+      // for  modifier and character key strings
+      return mods.join(' ');
+    }
+    // for purely modifier key strings
     return mods.join(' ');
   }
 }
