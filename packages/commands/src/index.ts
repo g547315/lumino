@@ -581,7 +581,15 @@ export class CommandRegistry {
     // If there is an exact match but no partial match, the exact match
     // can be dispatched immediately. The pending state is cleared so
     // the next key press starts from the default state.
-    if (exact && !partial) {
+    if (
+      exact &&
+      !partial &&
+      !(
+        exact.keys.toString() === 'Alt' ||
+        exact.keys.toString() === 'Ctrl' ||
+        exact.keys.toString() === 'Shift'
+      )
+    ) {
       this._executeKeyBinding(exact);
       this._clearPendingState();
       return;
