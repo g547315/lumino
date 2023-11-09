@@ -545,10 +545,6 @@ export class CommandRegistry {
       return;
     }
 
-    console.log(this._keyBindings);
-    console.log(this._keystrokes);
-    console.log(exact, null, partial);
-
     // Remove modifier key only keystrokes from the current key sequence.
     // keystrokes that are modifier key(s) plus another key are not affected
     // intended functionality: Alt then Alt 1 should result to: ['Alt'] then ['Alt 1']
@@ -560,25 +556,6 @@ export class CommandRegistry {
       (event.shiftKey && event.key === 'Shift')
     ) {
       this._keystrokes.length = 0;
-    }
-
-    console.log(exact?.keys.toString());
-
-    // If there is an exact match but no partial match, the exact match
-    // can be dispatched immediately. The pending state is cleared so
-    // the next key press starts from the default state.
-    if (
-      exact &&
-      !partial &&
-      !(
-        exact.keys.toString() === 'Alt' ||
-        exact.keys.toString() === 'Ctrl' ||
-        exact.keys.toString() === 'Shift'
-      )
-    ) {
-      this._executeKeyBinding(exact);
-      this._clearPendingState();
-      return;
     }
 
     // Stop propagation of the event. If there is only a partial match,
@@ -595,7 +572,8 @@ export class CommandRegistry {
       !(
         exact.keys.toString() === 'Alt' ||
         exact.keys.toString() === 'Ctrl' ||
-        exact.keys.toString() === 'Shift'
+        exact.keys.toString() === 'Shift' ||
+        exact.keys.toString() === 'Alt Shift'
       )
     ) {
       this._executeKeyBinding(exact);
